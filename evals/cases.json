@@ -1,0 +1,3 @@
+[
+  { "question": "What does the sample doc say about Cloud Run?", "mustInclude": ["scale"] }
+]

@@ -1,0 +1,21 @@
+{
+  "name": "gcp-rag",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ingest": "node src/ingest.js docs",
+    "start": "node src/server.js",
+    "build": "npm --prefix web run build",
+    "dev:web": "npm --prefix web run dev",
+    "dev:mock": "MOCK_AI=1 node src/server.js",
+    "eval": "node evals/run.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@google/genai": "^2.31.0",
+    "express": "^5.3.0"
+  }
+}
