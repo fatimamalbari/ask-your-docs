@@ -1,13 +1,16 @@
 import { useEffect, useRef } from 'react';
+import { useChat } from '../chat-context';
 
-export default function Sources({ message, highlight }) {
-  const refs = useRef({});
+export default function Sources() {
+  const { messages, focus } = useChat();
+  const refs = useRef<Record<number, HTMLDivElement | null>>({});
+
+  const message = messages.find((m) => m.id === focus.id);
+  const sources = message?.status === 'done' ? message.result.sources : [];
 
   useEffect(() => {
-    if (highlight != null) refs.current[highlight]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  }, [highlight, message?.id]);
-
-  const sources = message?.status === 'done' ? message.result.sources : [];
+    if (focus.n != null) refs.current[focus.n]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [focus.n, focus.id]);
 
   return (
     <aside className="col" aria-label="Sources">
@@ -17,10 +20,17 @@ export default function Sources({ message, highlight }) {
       ) : (
         <div className="stack">
           {sources.map((s) => (
-            <div key={s.n} ref={(el) => (refs.current[s.n] = el)} className={`src${highlight === s.n ? ' hl' : ''}`}>
+            <div
+              key={s.n}
+              ref={(el) => {
+                refs.current[s.n] = el;
+              }}
+              className={`src${focus.n === s.n ? ' hl' : ''}`}
+            >
               <header>
                 <span>
                   [{s.n}] {s.source}
+                  {s.page != null && ` · p. ${s.page}`}
                 </span>
                 <span>
                   {s.score.toFixed(2)}

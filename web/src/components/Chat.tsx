@@ -1,20 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useChat } from '../chat-context';
+import { useDocs } from '../queries';
+import type { ChatMessage } from '../types';
 
 // Turns "text [1] more [2]" into text plus clickable citation buttons.
-function AnswerText({ text, onCite }) {
-  return text.split(/(\[\d+\])/g).map((part, i) => {
-    const m = part.match(/^\[(\d+)\]$/);
-    return m ? (
-      <button key={i} type="button" className="cite" onClick={() => onCite(Number(m[1]))}>
-        {part}
-      </button>
-    ) : (
-      part
-    );
-  });
+function AnswerText({ text, onCite }: { text: string; onCite: (n: number) => void }) {
+  return (
+    <>
+      {text.split(/(\[\d+\])/g).map((part, i) => {
+        const m = part.match(/^\[(\d+)\]$/);
+        return m ? (
+          <button key={i} type="button" className="cite" onClick={() => onCite(Number(m[1]))}>
+            {part}
+          </button>
+        ) : (
+          part
+        );
+      })}
+    </>
+  );
 }
 
-function Message({ message, onCite }) {
+function Message({ message, onCite }: { message: ChatMessage; onCite: (id: number, n: number | null) => void }) {
   return (
     <>
       <div className="msg-q">{message.question}</div>
@@ -38,22 +45,23 @@ function Message({ message, onCite }) {
   );
 }
 
-export default function Chat({ docs, messages, onAsk, onCite }) {
+export default function Chat() {
+  const { messages, busy, ask, setFocus } = useChat();
+  const { data: docs = [] } = useDocs();
   const [text, setText] = useState('');
-  const endRef = useRef(null);
-  const busy = messages.some((m) => m.status === 'pending');
+  const endRef = useRef<HTMLDivElement>(null);
   const noDocs = docs.length === 0;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end' });
   }, [messages]);
 
-  function submit(e) {
+  function submit(e: FormEvent) {
     e.preventDefault();
     const q = text.trim();
     if (!q || busy || noDocs) return;
     setText('');
-    onAsk(q);
+    ask(q);
   }
 
   return (
@@ -67,7 +75,7 @@ export default function Chat({ docs, messages, onAsk, onCite }) {
             {!noDocs && (
               <div className="chips">
                 {docs.slice(0, 3).map((d) => (
-                  <button key={d.name} type="button" className="chip" onClick={() => onAsk(`What does ${d.name} cover?`)}>
+                  <button key={d.name} type="button" className="chip" onClick={() => ask(`What does ${d.name} cover?`)}>
                     What does {d.name} cover?
                   </button>
                 ))}
@@ -75,7 +83,9 @@ export default function Chat({ docs, messages, onAsk, onCite }) {
             )}
           </div>
         ) : (
-          messages.map((m) => <Message key={m.id} message={m} onCite={onCite} />)
+          messages.map((m) => (
+            <Message key={m.id} message={m} onCite={(id, n) => setFocus({ id, n })} />
+          ))
         )}
         <div ref={endRef} />
       </div>

@@ -12,7 +12,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
 COPY src ./src
-COPY index.json ./index.json
+# Index shards come from storage at runtime, not from the image.
 COPY --from=web /web/dist ./web/dist
 ENV NODE_ENV=production
 CMD ["node", "src/server.js"]

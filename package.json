@@ -4,12 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "ingest": "node src/ingest.js docs",
+    "ingest": "uv run --project ingest python -m docask_ingest",
     "start": "node src/server.js",
     "build": "npm --prefix web run build",
     "dev:web": "npm --prefix web run dev",
     "dev:mock": "MOCK_AI=1 node src/server.js",
-    "eval": "node evals/run.js"
+    "eval": "node evals/run.js",
+    "test": "node --test test/"
   },
   "engines": {
     "node": ">=20"

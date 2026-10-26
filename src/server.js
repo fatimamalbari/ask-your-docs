@@ -25,5 +25,11 @@ app.post('/api/ask', async (req, res) => {
   }
 });
 
+// Client-side routes (e.g. /documents) must return the app shell on a hard refresh.
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
+  res.sendFile(new URL('../web/dist/index.html', import.meta.url).pathname);
+});
+
 const port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`listening on ${port}`));
